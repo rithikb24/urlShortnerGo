@@ -3,6 +3,7 @@ package urlshort
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 )
 
 // MapHandler will return an http.HandlerFunc (which also
@@ -15,15 +16,15 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 	//	TODO: Implement this...
 
 	redirect := func(w http.ResponseWriter, r *http.Request) {
-		if pathsToUrls[r.URL.Path] != "nil" {
-			fmt.Println(pathsToUrls[r.URL.Path])
-			http.Redirect(w, r, pathsToUrls[r.URL.Path], http.StatusSeeOther)
+		path, ok := pathsToUrls[r.URL.Path]
+		fmt.Println(reflect.TypeOf(path), reflect.TypeOf(ok))
+		if ok {
+			http.Redirect(w, r, path, http.StatusFound)
 		} else {
-			fmt.Println(fallback)
+			fallback.ServeHTTP(w, r)
 		}
 	}
 	return redirect
-
 }
 
 // YAMLHandler will parse the provided YAML and then return
